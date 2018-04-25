@@ -5,6 +5,9 @@ Clone this repo using your favorite IDE and follow the steps to start using Vagr
 
 You can always go to the vagrant website to get the full documentation @ https://www.vagrantup.com/intro/index.html
 
+Start by reading this page. Then, follow the steps (They are numbered for your convenience).
+The example folder contains additional scenarios to play arround with.
+
 ## What it is?
 Designed over ruby, vagrant is a tool for configuring and managing complete virtual environments. Whether it is a single machine or multi machine environemnt,
 it gives you the ability to create it detached from the vendor (provider) and your machine.
