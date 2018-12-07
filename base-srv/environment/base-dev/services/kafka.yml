@@ -1,0 +1,121 @@
+# Zookeeper
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zookeeper-deployment
+spec:
+  selector:
+    matchLabels:
+      app: zookeeper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: docker-virtual.artifactory.igentify.net/confluentinc/cp-zookeeper:4.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 2181
+          hostPort: 2181
+        env:
+          - name: ZOOKEEPER_CLIENT_PORT
+            value: '2181'
+          - name: ZOOKEEPER_TICK_TIME
+            value: '2000'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-service
+spec:
+  ports:
+    - port: 2181
+      targetPort: 2181
+  selector:
+    app: zookeeper
+
+# Kafdrop
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafdrop-deployment
+spec:
+  selector:
+    matchLabels:
+      app: kafdrop
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafdrop
+    spec:
+      initContainers:
+      - name: init-zookeeper-first
+        image: busybox
+        command: ['sh', '-c', 'until nslookup zookeeper-service; do echo waiting for zookeeper-service; sleep 5; done;']
+      containers:
+      - name: zookeeper
+        image: docker-virtual.artifactory.igentify.net/kafdrop:2.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+          hostPort: 9000
+        env:
+          - name: ZOOKEEPER_CONNECT
+            valueFrom:
+              configMapKeyRef:
+                name: base-dev-map
+                key: KAFKA_ZOOKEEPER_CONNECT
+
+
+# Kafka
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-deployment
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: kafka
+        image: docker-virtual.artifactory.igentify.net/confluentinc/cp-kafka:4.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9092
+          hostPort: 9092
+        env:
+          - name: cluster.enable
+            value: 'true'
+          - name: KAFKA_ZOOKEEPER_CONNECT
+            valueFrom:
+              configMapKeyRef:
+                name: base-dev-map
+                key: KAFKA_ZOOKEEPER_CONNECT
+          - name: KAFKA_BROKER_ID
+            value: '1'
+          - name: KAFKA_ADVERTISED_LISTENERS
+            valueFrom:
+              configMapKeyRef:
+                name: base-dev-map
+                key: KAFKA_ADVERTISED_LISTENERS
+          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+            value: '1'

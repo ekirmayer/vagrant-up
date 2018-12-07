@@ -1,0 +1,16 @@
+configs:
+  base-ip: '192.168.20'
+  load:
+    base-dev:    #ip:31
+      load: true
+      services:
+        mongo: true
+        kafka: false
+        postgres: false
+        redis: false
+        mysql: false
+    elk-dev:    #ip:32
+      load: false
+    selenium:  #ip:33
+      load: false
+  

@@ -1,0 +1,30 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+current_dir = File.dirname(File.expand_path(__FILE__))
+config_dir = File.dirname(File.expand_path('../../',__FILE__))
+configs = YAML.load_file("#{config_dir}/config.yml")
+vagrant_config = configs['configs']
+
+Vagrant.configure("2") do |config|
+  config.vm.define "elk-dev" do |machine|
+
+    machine.vm.provider 'virtualbox' do |vb|
+      # Customize the amount of memory on the VM:
+      vb.memory = '5120'
+    end
+    machine.vm.box = 'ubuntu/xenial64'
+    machine.vm.hostname = 'elk-dev'
+    machine.vm.network 'private_network', ip: "#{vagrant_config['base-ip']}.32"
+
+    machine.vm.provision "chef_solo" do |chef|
+      chef.add_recipe "k8s"
+      chef.cookbooks_path = ["cookbooks"]
+    end
+
+    machine.vm.provision 'shell', path: "#{current_dir}/scripts/create-elk-services.sh"
+  end
+
+end

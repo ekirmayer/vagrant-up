@@ -1,0 +1,22 @@
+# redis
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: docker-virtual.artifactory.igentify.net/redis:4.0.9-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+          hostPort: 6379

@@ -1,0 +1,130 @@
+#postrgesSQL
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: postgress-pv-volume
+  labels:
+    type: local
+spec:
+  volumeMode: Filesystem
+  storageClassName: posgres
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/data/postgres"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgress-pv-claim
+  labels:
+    app: postgress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: posgres
+  resources:
+      requests:
+        storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-deployment
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+        - name: postgres
+          image: docker-virtual.artifactory.igentify.net/postgres
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 5432
+            hostPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: '12345'
+          volumeMounts:
+          - name: postgress-pv-volume
+            mountPath: /var/lib/postgresql/data
+      volumes:
+      - name:  postgress-pv-volume
+        persistentVolumeClaim:
+          claimName: postgress-pv-claim
+
+# pgAdmin 4
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pgadmin-pv-volume
+  labels:
+    type: local
+spec:
+  volumeMode: Filesystem
+  storageClassName: pgadmin
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/vagrant/environment/base-dev/postgressData/"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-pv-claim
+  labels:
+    app: pgadmin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: pgadmin
+  resources:
+      requests:
+        storage: 2Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin-deployment
+spec:
+  selector:
+    matchLabels:
+      app: pgadmin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: docker-virtual.artifactory.igentify.net/dpage/pgadmin4
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 80
+            hostPort: 8080
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: 'user@domain.com'
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: '12345'
+          volumeMounts:
+          - name: pgadmin-pv-volume
+            mountPath: /var/lib/pgadmin
+      volumes:
+      - name:  pgadmin-pv-volume
+        persistentVolumeClaim:
+          claimName: pgadmin-pv-claim

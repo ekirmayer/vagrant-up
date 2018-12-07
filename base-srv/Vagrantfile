@@ -1,0 +1,24 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+current_dir = File.dirname(File.expand_path(__FILE__))
+configs = YAML.load_file("#{current_dir}/config.yml")
+vagrant_config = configs['configs']
+vagrant_config_load = vagrant_config['load']
+
+
+# Load the environment components if it exist and if required by the configuration file
+##  base-dev
+include_vagrantfile_base_dev = File.expand_path("../environment/base-dev/Vagrantfile", __FILE__)
+load include_vagrantfile_base_dev if File.exist?(include_vagrantfile_base_dev) && vagrant_config_load['base-dev']['load']
+
+##  elk-dev
+include_vagrantfile_elk_dev = File.expand_path("../environment/elk-dev/Vagrantfile", __FILE__)
+load include_vagrantfile_elk_dev if File.exist?(include_vagrantfile_elk_dev) && vagrant_config_load['elk-dev']['load']
+
+##  selenium
+include_vagrantfile_selenium = File.expand_path("../environment/selenium/Vagrantfile", __FILE__)
+## load include_vagrantfile_ms_dev if File.exist?(include_vagrantfile_ms_dev) && vagrant_config_load['base-ms']
+load include_vagrantfile_selenium if File.exist?(include_vagrantfile_selenium) && vagrant_config_load['selenium']['load']
