@@ -9,6 +9,7 @@ The repository contains the following machines:
     * PostgreSQL
     * MySQL
     * Redis
+    * Minio
 2. elk-dev - contains the elastic stack (elasticsearch, logstash and kibana). This service is off be default
 3. selenium - A selnium hub deployment with 1 chrome endpoint executor
 
@@ -70,6 +71,8 @@ Base-dev:
             * PORT: 32306
         * phpMyAdmin:
             * PORT: 32082
+    Minio
+        * PORT: 32000
 
 Selenium:
 

@@ -9,6 +9,7 @@ configs:
         postgres: false
         redis: false
         mysql: false
+        minio: false
     elk-dev:    #ip:32
       load: false
     selenium:  #ip:33

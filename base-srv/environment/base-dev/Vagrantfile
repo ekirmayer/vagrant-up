@@ -75,6 +75,15 @@ Vagrant.configure("2") do |config|
       end
     end
 
+    # Create the Minio deployments
+    if vagrant_config['load']['base-dev']['services']['minio']
+      #Apply the deployments - Ruh always
+      machine.vm.provision "shell", run: "always" do |s|
+        s.inline = "kubectl apply -f /vagrant/environment/base-dev/services/minio.yml"
+      end
+    end
+
+
   end
 
 end
